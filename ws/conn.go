@@ -22,11 +22,11 @@ type conn struct {
 	senderID   int
 }
 
-func newConn(wsConn *websocket.Conn, chatroomID, senderID int) *conn {
+func newConn(wsConn *websocket.Conn) *conn {
 	return &conn{
-		wsConn:     wsConn,
-		chatroomID: chatroomID,
-		senderID:   senderID,
+		wsConn: wsConn,
+		//chatroomID: chatroomID,
+		//senderID:   senderID,
 	}
 }
 func (c *conn) run() error {
@@ -41,4 +41,12 @@ func (c *conn) run() error {
 	c.wg.Wait()
 	*/
 	return nil
+}
+
+func (c *conn) publish() {
+
+}
+
+func (c *conn) subscribe() {
+
 }
