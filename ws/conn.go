@@ -1,10 +1,13 @@
 package ws
 
 import (
+	"fmt"
+	"log"
 	"sync"
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/jeonjonghyeok/chat-mqtt/mqtt"
 )
 
 const (
@@ -17,16 +20,11 @@ const (
 type conn struct {
 	wsConn *websocket.Conn
 	wg     sync.WaitGroup
-	//sub        db.ChatroomSubscription
-	chatroomID int
-	senderID   int
 }
 
 func newConn(wsConn *websocket.Conn) *conn {
 	return &conn{
 		wsConn: wsConn,
-		//chatroomID: chatroomID,
-		//senderID:   senderID,
 	}
 }
 func (c *conn) run() error {
@@ -40,13 +38,26 @@ func (c *conn) run() error {
 
 	c.wg.Wait()
 	*/
+	c.sub()
+	c.pub()
 	return nil
 }
 
-func (c *conn) publish() {
-
+func (c *conn) pub() {
+	log.Println("publish call")
+	num := 10
+	for i := 0; i < num; i++ {
+		text := fmt.Sprintf("Message %d", i)
+		token := mqtt.Client.Publish("topic/test", 0, false, text)
+		token.Wait()
+		time.Sleep(time.Second)
+	}
 }
 
-func (c *conn) subscribe() {
-
+func (c *conn) sub() {
+	log.Println("subscribe call")
+	topic := "topic/test"
+	token := mqtt.Client.Subscribe(topic, 2, nil)
+	token.Wait()
+	fmt.Printf("Subscribed to topic: %s", topic)
 }

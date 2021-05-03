@@ -1,11 +1,16 @@
 package main
 
 import (
-	"net/http"
+	"log"
 
-	"github.com/jeonjonghyeok/chat-mqtt/api"
+	"github.com/jeonjonghyeok/chat-mqtt/server"
 )
 
 func main() {
-	http.ListenAndServe(":5000", api.API())
+	if err := server.ListenAndServe(server.Config{
+		Address: ":5000",
+	}); err != nil {
+		log.Fatal(err)
+	}
+
 }
