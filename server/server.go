@@ -3,20 +3,14 @@ package server
 import (
 	"net/http"
 
-	"github.com/jeonjonghyeok/chat-mqtt/mqtt"
-	"github.com/jeonjonghyeok/chat-mqtt/ws"
-)
-
-const (
-	broker = "broker.emqx.io"
-	port   = 1883
+	"github.com/jeonjonghyeok/chat-mqtt/api"
 )
 
 type Config struct {
 	Address string
+	Url     string
 }
 
 func ListenAndServe(c Config) error {
-	mqtt.NewBroker(broker, port)
-	return http.ListenAndServe(c.Address, ws.ChatHandler())
+	return http.ListenAndServe(c.Address, api.API())
 }

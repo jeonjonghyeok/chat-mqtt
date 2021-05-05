@@ -9,6 +9,10 @@ import (
 func API() http.Handler {
 	router := mux.NewRouter()
 
+	//user
+	router.HandleFunc("/signup", signup).Methods(http.MethodPost, http.MethodOptions)
+	router.HandleFunc("/signin", signin).Methods(http.MethodPost, http.MethodOptions)
+
 	//chatroom
 	router.HandleFunc("/room", createRoom).Methods(http.MethodPost, http.MethodOptions)
 	router.HandleFunc("/rooms", getRooms).Methods(http.MethodGet, http.MethodOptions)
