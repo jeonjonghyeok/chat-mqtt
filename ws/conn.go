@@ -8,6 +8,7 @@ import (
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/gorilla/websocket"
+	"github.com/jeonjonghyeok/chat-mqtt/vo"
 )
 
 const (
@@ -36,33 +37,24 @@ func newConn(wsConn *websocket.Conn, roomID, userID int) *conn {
 	}
 }
 func (c *conn) run() error {
-	/*sub, err := db.NewChatroomSubscription(c.chatroomID)
-	if err != nil {
-		return err
-	}
-	c.sub = sub
-
-	c.wg.Add(2)
-
+	c.wg.Add(1)
+	go c.readPump()
 	c.wg.Wait()
-	*/
-	client := NewBroker(broker, port, c.userID)
-	c.sub(client)
-	c.pub(client)
-
-	client.Disconnect(250)
 	return nil
 }
 
-func (c *conn) pub(client mqtt.Client) {
-	log.Println("publish call")
-	num := 10
-	for i := 0; i < num; i++ {
-		text := fmt.Sprintf("Message %d", i)
-		token := client.Publish("topic/test", 0, false, text)
-		token.Wait()
-		time.Sleep(time.Second)
+func (c *conn) pub(client mqtt.Client, msg vo.Message) {
+	log.Println("Pub call")
+	//text := fmt.Sprintf(msg.Text)
+	/*msg_byte, err := json.Marshal(&msg)
+	if err != nil {
+		log.Println(err)
+		return
 	}
+	*/
+	token := client.Publish("topic/test", 0, false, msg.Text)
+	token.Wait()
+	time.Sleep(time.Second)
 }
 
 func (c *conn) sub(client mqtt.Client) {
@@ -71,4 +63,27 @@ func (c *conn) sub(client mqtt.Client) {
 	token := client.Subscribe(topic, 2, nil)
 	token.Wait()
 	fmt.Printf("Subscribed to topic: %s\n", topic)
+}
+
+func (c *conn) readPump() {
+	defer c.wg.Done()
+	client := NewBroker(broker, port, c.userID)
+	c.sub(client)
+
+	c.wsConn.SetReadLimit(maxMessageSize)
+	c.wsConn.SetReadDeadline(time.Now().Add(readTimeout))
+	c.wsConn.SetPongHandler(func(string) error {
+		c.wsConn.SetReadDeadline(time.Now().Add(readTimeout))
+		return nil
+	})
+
+	for {
+		var msg vo.Message
+		if err := c.wsConn.ReadJSON(&msg); err != nil {
+			log.Println("err reading:", err)
+			return
+		}
+		c.pub(client, msg)
+	}
+	client.Disconnect(250)
 }

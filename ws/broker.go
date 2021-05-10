@@ -2,12 +2,20 @@ package ws
 
 import (
 	"fmt"
+	"log"
+	"time"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
+	"github.com/jeonjonghyeok/chat-mqtt/vo"
 )
 
 var messagePubHandler mqtt.MessageHandler = func(client mqtt.Client, msg mqtt.Message) {
-	fmt.Printf("Received message: %s from topic: %s\n", msg.Payload(), msg.Topic())
+	//fmt.Printf("Received message: %s from topic: %s\n", msg.Payload(), msg.Topic())
+	Conn.SetWriteDeadline(time.Now().Add(writeTimeout))
+	var m vo.Message
+	m.Text = fmt.Sprintf("%s", msg.Payload())
+	log.Println("Text:", m.Text)
+	Conn.WriteJSON(m)
 }
 
 var connectHandler mqtt.OnConnectHandler = func(client mqtt.Client) {
@@ -21,7 +29,7 @@ var connectLostHandler mqtt.ConnectionLostHandler = func(client mqtt.Client, err
 func NewBroker(broker string, port, userID int) (Client mqtt.Client) {
 	opts := mqtt.NewClientOptions()
 	opts.AddBroker(fmt.Sprintf("tcp://%s:%d", broker, port))
-	opts.SetClientID(string(userID))
+	opts.SetClientID(fmt.Sprint(userID))
 	opts.SetUsername("emqx")
 	opts.SetPassword("public")
 	opts.SetDefaultPublishHandler(messagePubHandler)

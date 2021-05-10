@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 )
 
@@ -36,6 +37,7 @@ type simpleError struct {
 func (e simpleError) Write(w http.ResponseWriter) {
 	w.WriteHeader(e.status)
 	json.NewEncoder(w).Encode(errorResponse{e.message})
+	log.Println(e.message)
 }
 
 var internalError = simpleError{

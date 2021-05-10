@@ -24,9 +24,9 @@ func RoomExists(id int) (exists bool, err error) {
 }
 
 // GetRooms 모든 채팅방 리턴
-func GetRooms(uid int) ([]vo.Room, error) {
+func GetRooms() ([]vo.Room, error) {
 	rooms := []vo.Room{}
-	rows, err := db.Query(`SELECT id, name, s_id, b_id FROM chatrooms`)
+	rows, err := db.Query(`SELECT id, name FROM chatrooms`)
 	if err != nil {
 		log.Println(err)
 		return nil, err
@@ -35,20 +35,9 @@ func GetRooms(uid int) ([]vo.Room, error) {
 
 	for rows.Next() {
 		var room vo.Room
-		var sid, bid interface{}
-		if err := rows.Scan(&room.ID, &room.Name, &sid, &bid); err != nil {
-			log.Println(err)
+		if err := rows.Scan(&room.ID, &room.Name); err != nil {
 			return nil, err
 		}
-		s, sOK := sid.(int64)
-		b, bOK := bid.(int64)
-
-		if sOK && bOK {
-			if int(s) != uid && int(b) != uid {
-				continue
-			}
-		}
-
 		rooms = append(rooms, room)
 	}
 
@@ -96,51 +85,4 @@ func GetAnotherUser(roomID, id int) (int, error) {
 	}
 	return 0, errors.New("user not pull join channel")
 
-}
-
-func ConnectToRoom(uid, roomID int) error {
-	sid, bid, err := GetChatUser(roomID)
-	if err != nil {
-		log.Println(err)
-		return err
-	}
-	log.Println(sid, bid)
-	s, sidOk := sid.(int64)
-	_, bidOk := bid.(int64)
-	if !sidOk && !bidOk {
-		res, err := db.Exec(`UPDATE chatrooms SET s_id = $1 WHERE id=$2`, uid, roomID)
-		if err != nil {
-			log.Println(err)
-			return err
-		}
-		if r, err := res.RowsAffected(); r == 0 || err != nil {
-			log.Println(err)
-			return err
-		}
-	} else if !bidOk {
-		if uid != int(s) {
-			res, err := db.Exec(`UPDATE chatrooms SET b_id = $1 WHERE id=$2`, uid, roomID)
-			if err != nil {
-				log.Println(err)
-				return err
-			}
-			if r, err := res.RowsAffected(); r == 0 || err != nil {
-				log.Println(err)
-				return err
-			}
-		}
-
-	}
-	return nil
-}
-
-func GetChatUser(roomID int) (sid, bid interface{}, err error) {
-	err = db.QueryRow(`SELECT s_id, b_id 
-		FROM chatrooms
-		WHERE id=$1`, roomID).Scan(&sid, &bid)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	return
 }
