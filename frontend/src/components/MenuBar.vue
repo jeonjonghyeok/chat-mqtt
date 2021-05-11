@@ -19,49 +19,16 @@
           </svg>뒤로</div>
       </div>
       <div class="room-name">{{roomName}}</div>
-      <div class="right">
-        <button 
-        class="btn-contract"
-        @click='addContract'
-        > 대화 저장 </button>
-        <button class="btn-contract"
-        @click='getContract'
-        > 대화 조회 </button>
-      </div>
+      <div class="right"></div>
     </div>
 </template>
 
 <script>
-import {ref} from 'vue'
 export default {
     name: 'MenuBar',
-    emits: ['disconnect','contract'],
+    emits: ['disconnect'],
     props: {
-        roomName: String,
-        roomID: Number,
-        token: String
-    },
-    setup(props, {emit}) {
-      const contract = ref([])
-  
-      const getContract = async () => {
-        emit('contract')
-      }
-      const addContract = async () => {
-        await fetch(`http://110.165.17.149:5000/contract?token=${encodeURIComponent(props.token)}`, {
-          method: 'POST',
-          body: JSON.stringify({
-            'roomID': props.roomID
-          })
-        }),
-        alert('대화가 저장 되었습니다.')
-      }
-      
-      return {
-        addContract,
-        getContract,
-        contract,
-      }
+        roomName: String
     }
 }
 </script>
@@ -87,25 +54,6 @@ export default {
 
 .menubar .left {
   flex: 1;
-}
-.menubar .right {
-  line-height:60px;
-  text-align: center;
-  width: 50px; 
-  height: 50px;
-}
-.menubar .right .btn-contract {
-  border-radius: 5px;
-  outline: none;
-  color: #444;
-  background-color:aliceblue;
-  border:none;
-  align-self: center;
-  font-weight: bold;
-  padding: 0.5em 1em;
-  cursor: pointer;
-  font-family: sans-serif;
-  font-size: 15px;
 }
 
 .menubar .back-button {

@@ -12,12 +12,12 @@
         v-model="password"
       />
       <button
-        :disabled="!valid">{{mode === 'signin' ? 'signin' : 'signup'}}</button>
+        :disabled="!valid">{{mode === 'signin' ? '로그인하기' : '가입하기'}}</button>
       <a
         href="#"
         @click.prevent="toggleMode"
       >
-        {{mode == 'signin' ? 'signup' : 'signin'}}
+        {{mode == 'signin' ? '가입하러 가기' : '로그인하러 가기'}}
       </a>
     </form>
   </div>
@@ -44,7 +44,7 @@ export default {
       valid: computed(() => username.value.trim() !== '' && password.value !== ''),
       submit: async () => {
         try {
-          const resp = await fetch(`http://110.165.17.149:5000/${mode.value}`,
+          const resp = await fetch(`http://localhost:5000/${mode.value}`,
             {
               method: 'POST',
               body: JSON.stringify({
@@ -75,7 +75,6 @@ export default {
 
 a {
     font-size: 12px;
-    
 }
 
 input {
@@ -90,13 +89,5 @@ button {
   width: 100%;
   display: block;
   margin: auto;
-  box-sizing: border-box;
-  width: 100%;
-  background-color: #9AB9FF;
-  border-radius: 10px;
-  color: white;
-  outline:0;
-  border:0;
 }
-
 </style>

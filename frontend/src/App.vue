@@ -3,9 +3,6 @@
     class="enter"
     v-if="!roomOpen"
   >
-  <p
-  class="main-title"
-  >Welcome to T-chat</p>
     <Auth
       @token="token = $event"
       v-if="token === ''"
@@ -14,20 +11,13 @@
       v-else
       @click="token = ''"
     >로그아웃</button>
-    <hr
-      v-if="token !== ''"
-    >
+    <hr>
     <RoomSelection
-      v-if="token !== ''"
       :roomID="selectedRoom ? selectedRoom.id : 0"
-      :token="token"
       @selectChange="selectedRoom = $event"
     />
-    <hr
-      v-if="token !== ''"
-    >
+    <hr>
     <button
-      v-if="token !== ''"
       class="enterroombutton"
       @click="roomOpen = true"
       :disabled="token === ''"
@@ -54,7 +44,7 @@ export default {
   components: {
     Messenger,
     Auth,
-    RoomSelection,
+    RoomSelection
   },
   setup() {
     const selectedRoom = ref(undefined)
@@ -89,14 +79,5 @@ body {
 .enterroombutton {
   box-sizing: border-box;
   width: 100%;
-  background-color: #9AB9FF;
-  border-radius: 10px;
-  color: white;
-  outline:0;
-  border:0;
-}
-.main-titile {
-  font-family: sans-serif;
-  font-size: 26px;
 }
 </style>
