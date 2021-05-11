@@ -1,6 +1,7 @@
 package ws
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"time"
@@ -10,12 +11,17 @@ import (
 )
 
 var messagePubHandler mqtt.MessageHandler = func(client mqtt.Client, msg mqtt.Message) {
-	//fmt.Printf("Received message: %s from topic: %s\n", msg.Payload(), msg.Topic())
+	log.Println("message pub handler call")
 	Conn.SetWriteDeadline(time.Now().Add(writeTimeout))
 	var m vo.Message
-	m.Text = fmt.Sprintf("%s", msg.Payload())
-	log.Println("Text:", m.Text)
-	Conn.WriteJSON(m)
+	json.Unmarshal(msg.Payload(), &m)
+
+	log.Println("Text:", m)
+	if err := Conn.WriteJSON(m); err != nil {
+		log.Println(err)
+		return
+	}
+
 }
 
 var connectHandler mqtt.OnConnectHandler = func(client mqtt.Client) {

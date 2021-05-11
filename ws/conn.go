@@ -1,6 +1,7 @@
 package ws
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"sync"
@@ -45,15 +46,16 @@ func (c *conn) run() error {
 
 func (c *conn) pub(client mqtt.Client, msg vo.Message) {
 	log.Println("Pub call")
-	//text := fmt.Sprintf(msg.Text)
-	/*msg_byte, err := json.Marshal(&msg)
+	m, err := json.Marshal(msg)
 	if err != nil {
 		log.Println(err)
 		return
 	}
-	*/
-	token := client.Publish("topic/test", 0, false, msg.Text)
+	token := client.Publish("topic/test", 1, false, m)
 	token.Wait()
+	if token.Error() != nil {
+		log.Println(token.Error())
+	}
 	time.Sleep(time.Second)
 }
 

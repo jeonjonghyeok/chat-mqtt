@@ -12,11 +12,12 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 	CheckOrigin:     func(r *http.Request) bool { return true },
 }
-var Conn websocket.Conn
+var Conn *websocket.Conn
 
 func ChatHandler(roomID, userID int) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		Conn, err := upgrader.Upgrade(w, r, nil)
+		var err error
+		Conn, err = upgrader.Upgrade(w, r, nil)
 		if err != nil {
 			log.Println(err)
 			return
