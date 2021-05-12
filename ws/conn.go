@@ -9,6 +9,7 @@ import (
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/gorilla/websocket"
+	"github.com/jeonjonghyeok/chat-mqtt/db"
 	"github.com/jeonjonghyeok/chat-mqtt/vo"
 )
 
@@ -28,6 +29,7 @@ type conn struct {
 	wg     sync.WaitGroup
 	roomID int
 	userID int
+	mutex  sync.Mutex
 }
 
 func newConn(wsConn *websocket.Conn, roomID, userID int) *conn {
@@ -46,6 +48,16 @@ func (c *conn) run() error {
 
 func (c *conn) pub(client mqtt.Client, msg vo.Message) {
 	log.Println("Pub call")
+	user, err := db.GetUser(c.userID)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	msg.Sender = user
+	msg.SenderID = c.userID
+	msg.SentOn = time.Now()
+
 	m, err := json.Marshal(msg)
 	if err != nil {
 		log.Println(err)

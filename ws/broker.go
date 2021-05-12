@@ -11,17 +11,21 @@ import (
 )
 
 var messagePubHandler mqtt.MessageHandler = func(client mqtt.Client, msg mqtt.Message) {
+	NewConn.mutex.Lock()
+	defer NewConn.mutex.Unlock()
 	log.Println("message pub handler call")
-	Conn.SetWriteDeadline(time.Now().Add(writeTimeout))
+	NewConn.wsConn.SetWriteDeadline(time.Now().Add(writeTimeout))
 	var m vo.Message
-	json.Unmarshal(msg.Payload(), &m)
-
-	log.Println("Text:", m)
-	if err := Conn.WriteJSON(m); err != nil {
+	if err := json.Unmarshal(msg.Payload(), &m); err != nil {
 		log.Println(err)
 		return
 	}
 
+	log.Println("ID:", m.ID, " Sender:", m.Sender, " SenderID:", m.SenderID, " Msg:", m.Text)
+	if err := NewConn.wsConn.WriteJSON(m); err != nil {
+		log.Println(err)
+		return
+	}
 }
 
 var connectHandler mqtt.OnConnectHandler = func(client mqtt.Client) {

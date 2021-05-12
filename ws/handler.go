@@ -13,6 +13,7 @@ var upgrader = websocket.Upgrader{
 	CheckOrigin:     func(r *http.Request) bool { return true },
 }
 var Conn *websocket.Conn
+var NewConn *conn
 
 func ChatHandler(roomID, userID int) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -24,7 +25,8 @@ func ChatHandler(roomID, userID int) http.Handler {
 		}
 		defer Conn.Close()
 
-		if err := newConn(Conn, roomID, userID).run(); err != nil {
+		NewConn = newConn(Conn, roomID, userID)
+		if err := NewConn.run(); err != nil {
 			log.Println(err)
 		}
 	})
