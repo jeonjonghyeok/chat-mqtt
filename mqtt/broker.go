@@ -13,7 +13,7 @@ var messagePubHandler mqtt.MessageHandler = func(client mqtt.Client, msg mqtt.Me
 		log.Println("bye")
 		return
 	}
-	fmt.Printf("[server]: %s from topic: %s\n", msg.Payload(), msg.Topic())
+	fmt.Printf("[%s]%s\n", msg.Topic(), msg.Payload())
 }
 
 var connectHandler mqtt.OnConnectHandler = func(client mqtt.Client) {
@@ -38,7 +38,7 @@ func NewClient(broker, name string, port int) (Client mqtt.Client) {
 }
 
 func Pub(client mqtt.Client, topic, msg, name string) {
-	text := fmt.Sprintf("Name %s, Message %s", name, msg)
+	text := fmt.Sprintf(" %s: %s", name, msg)
 	token := client.Publish(topic, 0, false, text)
 	token.Wait()
 	time.Sleep(time.Second)
